@@ -55,7 +55,10 @@ for url in urls:
                         dic_15["content"] += (
                             remove_special_characters(content.text) + "\n"
                         )
-                dic_15["title"] = soup.find("title").text.strip()
+                if soup.find("h1") is None:
+                    dic_15["title"] = soup.find("h2").text.strip()
+                else:
+                    dic_15["title"] = soup.find("h1").text.strip()
                 dic_15["listening_duration"] = "15"
                 smalls = soup.find_all("small")
                 for small in smalls:
@@ -65,8 +68,13 @@ for url in urls:
                     if s.startswith("Source:"):
                         match = re.search(r"Source:.*?=", s)
                         dic_15["source"] = (
-                            match.group().rstrip("=").strip().replace("Source:", "")
+                            match.group()
+                            .rstrip("=")
+                            .strip()
+                            .replace("Source:", "")
+                            .replace("TEXT", "")
                         )
+                        ic(dic_15["source"])
                 for script in soup.find_all("script"):
                     text = script.string
                     if text is not None and text.startswith("MP3"):
@@ -94,63 +102,64 @@ with open("data_15.csv", "w", newline="") as f:
     w.writeheader()
     for entry_15 in list_15:
         w.writerow(entry_15)
-# list_5: List[dict[str, str]] = []
-# i = 1
-# while True:
-#     dic_5: dict[str, str] = {}
-#     url = f"https://www.manythings.org/voa/words/{i}.html"
-#     ic(url)
-#     page = requests.get(url, headers=headers)
-#     if page.status_code != 200 or i > 39:
-#         ic(i)
-#         break
-#     soup = BeautifulSoup(page.content, "html.parser")
-#     contents = soup.find_all("p")
-#     dic_5["content"] = ""
-#     for index, content in enumerate(contents):
-#         if len(contents) - 1 == index or index == 0:
-#             dic_5["content"] += remove_special_characters(content.text)
-#         else:
-#             dic_5["content"] += remove_special_characters(content.text) + "\n"
-
-#     dic_5["title"] = soup.find("title").text.strip().replace(",", "")
-#     ic(dic_5["title"])
-#     dic_5["listening_duration"] = "5"
-#     smalls = soup.find_all("small")
-#     for small in smalls:
-#         s = small.text.strip()
-#         if s.startswith("www"):
-#             dic_5["additional_information"] = s
-#             ic(dic_5["additional_information"])
-#         if s.startswith("Source:"):
-#             match = re.search(r"Source:.*?=", s)
-#             dic_5["source"] = match.group().rstrip("=").strip().replace("Source:", "")
-#             ic(dic_5["source"])
-#     for script in soup.find_all("script"):
-#         text = script.string
-#         if text is not None and text.startswith("MP3"):
-#             dic_5["audio_link"] = (
-#                 text.replace(";", "")
-#                 .replace('MP3Player("', "")
-#                 .replace('"', "")
-#                 .replace(")", "")
-#                 .replace(",", "")
-#             )
-#     list_5.append(dic_5)
-#     i += 1
-# with open("data_5.csv", "w", newline="") as f:
-#     w = csv.DictWriter(
-#         f,
-#         [
-#             "title",
-#             "audio_link",
-#             "source",
-#             "content",
-#             "listening_duration",
-#             "additional_information",
-#         ],
-#     )
-#     w.writeheader()
-#     ic(list)
-#     for entry in list_5:
-#         w.writerow(entry)
+list_5: List[dict[str, str]] = []
+i = 1
+while True:
+    dic_5: dict[str, str] = {}
+    url = f"https://www.manythings.org/voa/words/{i}.html"
+    ic(url)
+    page = requests.get(url, headers=headers)
+    if page.status_code != 200 or i > 39:
+        ic(i)
+        break
+    soup = BeautifulSoup(page.content, "html.parser")
+    contents = soup.find_all("p")
+    dic_5["content"] = ""
+    for index, content in enumerate(contents):
+        if len(contents) - 1 == index or index == 0:
+            dic_5["content"] += remove_special_characters(content.text)
+        else:
+            dic_5["content"] += remove_special_characters(content.text) + "\n"
+    ic(dic_5["content"])
+    dic_5["title"] = soup.find("title").text.strip().replace(",", "")
+    ic(dic_5["title"])
+    dic_5["listening_duration"] = "5"
+    smalls = soup.find_all("small")
+    for small in smalls:
+        s = small.text.strip()
+        if s.startswith("www"):
+            dic_5["additional_information"] = s
+            ic(dic_5["additional_information"])
+        if s.startswith("Source:"):
+            match = re.search(r"Source:.*?=", s)
+            dic_5["source"] = match.group().rstrip("=").strip().replace("Source:", "")
+            ic(dic_5["source"])
+    for script in soup.find_all("script"):
+        text = script.string
+        if text is not None and text.startswith("MP3"):
+            dic_5["audio_link"] = (
+                text.replace(";", "")
+                .replace('MP3Player("', "")
+                .replace('"', "")
+                .replace(")", "")
+                .replace(",", "")
+            )
+    list_5.append(dic_5)
+    break
+    i += 1
+with open("data_5.csv", "w", newline="") as f:
+    w = csv.DictWriter(
+        f,
+        [
+            "title",
+            "audio_link",
+            "source",
+            "content",
+            "listening_duration",
+            "additional_information",
+        ],
+    )
+    w.writeheader()
+    ic(list)
+    for entry in list_5:
+        w.writerow(entry)
